@@ -100,7 +100,7 @@ class EncoderDecoder(nn.Module):
 
         #last_y_values = unpack_batch[0][:, -1, -1].data.contiguous().view(batch.batch_sizes[0], 1)
         last_y_values = [b[-1,-1] for b in batch]
-        last_y_values = torch.FloatTensor(last_y_values)
+        last_y_values = maybe_cuda(torch.FloatTensor(last_y_values),self.isCuda)
 
         x = torch.cat((output.data, last_y_values), 1)
         predicted_value = self.fc(Variable(maybe_cuda(x,self.isCuda) ))
