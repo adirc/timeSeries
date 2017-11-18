@@ -39,10 +39,14 @@ def main(args):
         model = Encoder_Decoder.create(isCuda)
     model.train()
     model = maybe_cuda(model,args.cuda)
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    print (1e-3)
+    print(1e-2)
+    print (0.01)
+    print (args.lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr=float(args.lr))
 
     # Reduce LR by 0.1 every 3 epochs
-    torch.optim.lr_scheduler.StepLR(optimizer, step_size=len(train_dl) * args.lrSteps, gamma=0.1, last_epoch=-1)
+    torch.optim.lr_scheduler.StepLR(optimizer, step_size=len(train_dl) * args.schedulerSteps, gamma=0.1, last_epoch=-1)
 
     for j in range(num_epochs):
         total_loss = float(0)
@@ -94,7 +98,7 @@ if __name__ == '__main__':
     parser.add_argument('--maxNorm', help='max norm of gradient', default=1)
     parser.add_argument('--lr', help='initial lr', default=1e-3)
     parser.add_argument('--epochs', help='num of epochs', type=int, default=10)
-    parser.add_argument('--lrSteps', help='lr schedualer steps', type=int, default=3)
+    parser.add_argument('--schedulerSteps', help='lr scheduler steps', type=int, default=3)
     parser.add_argument('--bs', help='Batch size', type=int, default=16)
 
 
