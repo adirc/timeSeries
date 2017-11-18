@@ -34,7 +34,7 @@ class Encoder(nn.Module):
         ## TODO: can I get part of the packed_seq without unpaked it first ?
         unPacked_output = pad_packed_sequence(packed_output,batch_first=True) #batchSize x seqLength x FeatureSize
         # TODO: check that -1 is indeed the kast timestamp (and not 0)
-        output = Variable(maybe_cuda(unPacked_output[0].data[:,-1,:]) ) # batchSize * inputSize*2
+        output = Variable(maybe_cuda(unPacked_output[0].data[:,-1,:],self.isCuda) ) # batchSize * inputSize*2
         #lengths = [output.size(1) for i in range(output.size(0))]
         #packed_output = pack_padded_sequence(output,lengths,batch_first=True)
         return output
@@ -61,7 +61,7 @@ class Decoder(nn.Module):
         packed_output,(h_0,c_0) = self.lstm(batch,init_s)
         unPacked_output = pad_packed_sequence(packed_output,batch_first=True) #batchSize x seqLength x FeatureSize
         # TODO: check that -1 is indeed the last timestamp (and not 0)
-        return Variable(maybe_cuda(unPacked_output[0].data[:,-1,:]) )
+        return Variable(maybe_cuda(unPacked_output[0].data[:,-1,:],self.isCuda) )
 
 class EncoderDecoder(nn.Module):
     def __init__(self,is_cuda):
@@ -91,7 +91,7 @@ class EncoderDecoder(nn.Module):
         # concat c with the previoues y's
         batch_y_values = [b[:,-1] for b in batch]
         batch_y_values = torch.FloatTensor(batch_y_values)
-        c_and_y = Variable(maybe_cuda(torch.cat((c.data, batch_y_values), 2)) )
+        c_and_y = Variable(maybe_cuda(torch.cat((c.data, batch_y_values), 2),self.isCuda) )
 
         lengths = [c_and_y.data.size(1) for i in range(c_and_y.data.size(0))]
         packed_c_and_y = pack_padded_sequence(c_and_y,lengths,batch_first=True)
@@ -103,7 +103,7 @@ class EncoderDecoder(nn.Module):
         last_y_values = torch.FloatTensor(last_y_values)
 
         x = torch.cat((output.data, last_y_values), 1)
-        predicted_value = self.fc(Variable(maybe_cuda(x) ))
+        predicted_value = self.fc(Variable(maybe_cuda(x,self.isCuda) ))
         return predicted_value
 
 
