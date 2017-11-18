@@ -2,16 +2,18 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 from torch.nn.utils.rnn import pad_packed_sequence,pack_padded_sequence
+from utils import maybe_cuda
 
 def zero_state(module, batch_size):
     # * 2 is for the two directions
-    return Variable(torch.zeros(module.num_layers * 2, batch_size, module.hidden)), \
-           Variable(torch.zeros(module.num_layers * 2, batch_size, module.hidden))
+    return Variable( maybe_cuda(torch.zeros(module.num_layers * 2, batch_size, module.hidden),module.isCuda) ), \
+           Variable(maybe_cuda(torch.zeros(module.num_layers * 2, batch_size, module.hidden),module.isCuda) )
 
 class Encoder(nn.Module):
 
-    def __init__(self, input_size=82, hidden=128, num_layers=2):
+    def __init__(self,is_cuda, input_size=82, hidden=128, num_layers=2):
         super(Encoder, self).__init__()
+        self.isCuda = is_cuda
         self.num_layers = num_layers
         self.hidden = hidden
         self.input_size = input_size
@@ -40,8 +42,9 @@ class Encoder(nn.Module):
 
 class Decoder(nn.Module):
 
-    def __init__(self,input_size, hidden=128, num_layers=2):
+    def __init__(self,is_cuda ,input_size, hidden=128, num_layers=2):
         super(Decoder, self).__init__()
+        self.isCuda = is_cuda
         self.num_layers = num_layers
         self.hidden = hidden
         self.input_size = input_size
@@ -61,12 +64,12 @@ class Decoder(nn.Module):
         return Variable(unPacked_output[0].data[:,-1,:])
 
 class EncoderDecoder(nn.Module):
-    def __init__(self):
+    def __init__(self,is_cuda):
         super(EncoderDecoder,self).__init__()
-        self.encoder = Encoder()
-
+        self.isCuda = is_cuda
+        self.encoder = Encoder(self.isCuda )
         # *2 for bidirectional. +1 for previous ys
-        self.decoder = Decoder(self.encoder.hidden* 2 + 1)
+        self.decoder = Decoder(self.isCuda ,self.encoder.hidden* 2 + 1)
         self.fc = nn.Linear(self.decoder.hidden * 2 + 1,1)
         self.criterion = nn.MSELoss()
 
@@ -104,5 +107,5 @@ class EncoderDecoder(nn.Module):
         return predicted_value
 
 
-def create():
-    return EncoderDecoder()
+def create(isCuda):
+    return EncoderDecoder(isCuda)

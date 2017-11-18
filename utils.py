@@ -9,8 +9,10 @@ def grad_norm(parameters,norm_type = 2):
     return total_norm
 
 
-def maybe_cuda(x, is_cuda=False):
+def maybe_cuda(x,is_cuda = False):
 
-    if is_cuda:
+    if (is_cuda):
         return x.cuda()
     return x
+
+
