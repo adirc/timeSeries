@@ -65,7 +65,7 @@ def main(args):
                 pbar.set_description('Training, #epoch={:} loss={:.4}'.format(j+1,np.true_divide(total_loss,i + 1) ))
                 unNormOutput = NasdaqDataset.unNormalizedYs(nasdaq_dataset, output.data)
                 unNormTarget = NasdaqDataset.unNormalizedYs(nasdaq_dataset, target.data)
-                rmse_calc.add(unNormOutput  - unNormTarget  )
+                rmse_calc.add(unNormOutput.cpu()  - unNormTarget.cpu()  )
 
         print (unNormOutput[0])
         print(unNormTarget[0])
