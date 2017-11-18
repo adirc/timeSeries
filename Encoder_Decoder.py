@@ -80,9 +80,9 @@ class EncoderDecoder(nn.Module):
 
         # remove last column - the previous y_s
         batch_to_encoder = [b[:,:-1] for b in batch]
-        big_tensor = Variable(maybe_cuda(torch.FloatTensor(batch_to_encoder)) )
+        big_tensor = Variable(maybe_cuda(torch.FloatTensor(batch_to_encoder),self.isCuda) )
         lengths = [big_tensor.size(1) for i in range(0, big_tensor.size(0))]
-        packed_batch_to_encoder = pack_padded_sequence(big_tensor, lengths, batch_first=True)
+        packed_batch_to_encoder = pack_padded_sequence(big_tensor, lengths  , batch_first=True)
 
         c = self.encoder(packed_batch_to_encoder) # return c vectors unpacked. tensor batchSize * (encoderHiddenSize*2)
         c = c.view(c.size(0),1,c.size(1))
