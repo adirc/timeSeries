@@ -7,3 +7,10 @@ def grad_norm(parameters,norm_type = 2):
             total_norm += param_norm ** norm_type
     total_norm = total_norm ** (1/norm_type)
     return total_norm
+
+
+def maybe_cuda(x, is_cuda=False):
+
+    if is_cuda:
+        return x.cuda()
+    return x

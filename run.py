@@ -8,6 +8,7 @@ from tqdm import tqdm
 from calc_statistics import rmse
 import numpy as np
 import os
+from utils import maybe_cuda
 
 
 
@@ -33,6 +34,7 @@ def main(args):
     else:
         model = Encoder_Decoder.create()
     model.train()
+    model = maybe_cuda(model,args.cuda)
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
     # Reduce LR by 0.1 every 3 epochs
@@ -47,7 +49,7 @@ def main(args):
 
                 model.zero_grad()
                 output = model(sample)
-                loss = model.criterion(output,target)
+                loss = model.criterion(output,maybe_cuda(target,args.cuda))
                 loss.backward()
 
                 #grad_norm(model.parameters())
@@ -83,6 +85,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--loadModel', help='load model?', action='store_true')
     parser.add_argument('--saveModel', help='save model?', action='store_true')
+    parser.add_argument('--cuda', help='save model?', action='store_true')
     parser.add_argument('--maxNorm', help='max norm of gradient', default=1)
     parser.add_argument('--epochs', help='num of epochs', type=int, default=10)
     parser.add_argument('--bs', help='Batch size', type=int, default=16)
