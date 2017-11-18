@@ -90,8 +90,8 @@ class EncoderDecoder(nn.Module):
 
         # concat c with the previoues y's
         batch_y_values = [b[:,-1] for b in batch]
-        batch_y_values = torch.FloatTensor(batch_y_values)
-        c_and_y = Variable(maybe_cuda(torch.cat((c.data, batch_y_values), 2),self.isCuda) )
+        batch_y_values = maybe_cuda(torch.FloatTensor(batch_y_values),self.isCuda)
+        c_and_y = Variable(maybe_cuda( torch.cat((c.data, batch_y_values), 2),self.isCuda)  )
 
         lengths = [c_and_y.data.size(1) for i in range(c_and_y.data.size(0))]
         packed_c_and_y = pack_padded_sequence(c_and_y,lengths,batch_first=True)
