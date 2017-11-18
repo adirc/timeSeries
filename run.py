@@ -36,7 +36,7 @@ def main(args):
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
     # Reduce LR by 0.1 every 3 epochs
-    torch.optim.lr_scheduler.StepLR(optimizer, step_size=len(train_dl) * 3, gamma=0.1, last_epoch=-1)
+    ##torch.optim.lr_scheduler.StepLR(optimizer, step_size=len(train_dl) * 3, gamma=0.1, last_epoch=-1)
 
     for j in range(num_epochs):
         total_loss = float(0)
@@ -51,7 +51,7 @@ def main(args):
                 loss.backward()
 
                 #grad_norm(model.parameters())
-                torch.nn.utils.clip_grad_norm(model.parameters(),max_norm = max_norm)
+                torch.nn.utils.clip_grad_norm(model.parameters(),max_norm = args.maxNorm)
                 #grad_norm(model.parameters())
 
                 optimizer.step()
@@ -83,7 +83,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--loadModel', help='load model?', action='store_true')
     parser.add_argument('--saveModel', help='save model?', action='store_true')
-    parser.add_argument('--maxNorm', help='max norm of gradient', required=True)
+    parser.add_argument('--maxNorm', help='max norm of gradient', default=1)
     parser.add_argument('--epochs', help='num of epochs', type=int, default=10)
     parser.add_argument('--bs', help='Batch size', type=int, default=16)
 
