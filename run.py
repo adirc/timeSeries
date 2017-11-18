@@ -39,10 +39,10 @@ def main(args):
         model = Encoder_Decoder.create(isCuda)
     model.train()
     model = maybe_cuda(model,args.cuda)
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     # Reduce LR by 0.1 every 3 epochs
-    torch.optim.lr_scheduler.StepLR(optimizer, step_size=len(train_dl) * 3, gamma=0.1, last_epoch=-1)
+    torch.optim.lr_scheduler.StepLR(optimizer, step_size=len(train_dl) * args.lrSteps, gamma=0.1, last_epoch=-1)
 
     for j in range(num_epochs):
         total_loss = float(0)
@@ -67,8 +67,9 @@ def main(args):
                 unNormTarget = NasdaqDataset.unNormalizedYs(nasdaq_dataset, target.data)
                 rmse_calc.add(unNormOutput.cpu()  - unNormTarget.cpu()  )
 
-        print (unNormOutput[0])
-        print(unNormTarget[0])
+        #print a prediction
+        #print (unNormOutput[0])
+        #print(unNormTarget[0])
 
 
 
@@ -91,7 +92,9 @@ if __name__ == '__main__':
     parser.add_argument('--saveModel', help='save model?', action='store_true')
     parser.add_argument('--cuda', help='cuda?', action='store_true')
     parser.add_argument('--maxNorm', help='max norm of gradient', default=1)
+    parser.add_argument('--lr', help='initial lr', default=1e-3)
     parser.add_argument('--epochs', help='num of epochs', type=int, default=10)
+    parser.add_argument('--lrSteps', help='lr schedualer steps', type=int, default=3)
     parser.add_argument('--bs', help='Batch size', type=int, default=16)
 
 
