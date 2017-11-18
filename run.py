@@ -7,24 +7,28 @@ import torch
 from tqdm import tqdm
 from calc_statistics import rmse
 import numpy as np
+import os
 
 
 
 
 def main(args):
-    num_epochs = 10
-    max_norm = 0.5
-    loadModelFromDisk = False
-    saveModelFromDisk = False
-    path = '/home/adir/Projects/data/nasdaq100/nasdaq100/small/nasdaq100_padding.csv'
+
+
+    num_epochs = args.epochs
+    batch_size = args.bs
     history = 10
-    batch_size = 128
+
+    path = '../data/nasdaq100/small/nasdaq100_padding.csv'
+
+
     nasdaq_dataset = NasdaqDataset(path,history,normalization=True,normalize_ys=True,scalingNorm=False)
     train_dl = DataLoader(nasdaq_dataset,batch_size=batch_size ,collate_fn = collate_fn)
     rmse_calc = rmse()
     #model = BasicRnn.create()
-    if (loadModelFromDisk):
-        with open('/home/adir/Projects/timeSeriesPrediction/models/model.t7', 'rb') as f:
+    if (args.loadModel):
+        with open('./models/model.t7', 'rb') as f:
+            print ('loaded model ' + os.path.abspath(f.name) )
             model = torch.load(f)
     else:
         model = Encoder_Decoder.create()
@@ -70,12 +74,20 @@ def main(args):
         print('')
 
         rmse_calc.reset()
-    if (saveModelFromDisk):
+    if (args.saveModel):
         torch.save(model,str('/home/adir/Projects/timeSeriesPrediction/models/model.t7' ))
 
 
 if __name__ == '__main__':
     parser = ArgumentParser()
+
+    parser.add_argument('--loadModel', help='load model?', action='store_true')
+    parser.add_argument('--saveModel', help='save model?', action='store_true')
+    parser.add_argument('--maxNorm', help='max norm of gradient', required=True)
+    parser.add_argument('--epochs', help='num of epochs', type=int, default=10)
+    parser.add_argument('--bs', help='Batch size', type=int, default=16)
+
+
 
     main(parser.parse_args())
 
