@@ -61,7 +61,7 @@ class Decoder(nn.Module):
         packed_output,(h_0,c_0) = self.lstm(batch,init_s)
         unPacked_output = pad_packed_sequence(packed_output,batch_first=True) #batchSize x seqLength x FeatureSize
         # TODO: check that -1 is indeed the last timestamp (and not 0)
-        return Variable(unPacked_output[0].data[:,-1,:])
+        return Variable(maybe_cuda(unPacked_output[0].data[:,-1,:]) )
 
 class EncoderDecoder(nn.Module):
     def __init__(self,is_cuda):
@@ -80,7 +80,7 @@ class EncoderDecoder(nn.Module):
 
         # remove last column - the previous y_s
         batch_to_encoder = [b[:,:-1] for b in batch]
-        big_tensor = Variable(torch.FloatTensor(batch_to_encoder))
+        big_tensor = Variable(maybe_cuda(torch.FloatTensor(batch_to_encoder)) )
         lengths = [big_tensor.size(1) for i in range(0, big_tensor.size(0))]
         packed_batch_to_encoder = pack_padded_sequence(big_tensor, lengths, batch_first=True)
 
@@ -91,7 +91,7 @@ class EncoderDecoder(nn.Module):
         # concat c with the previoues y's
         batch_y_values = [b[:,-1] for b in batch]
         batch_y_values = torch.FloatTensor(batch_y_values)
-        c_and_y = Variable(torch.cat((c.data, batch_y_values), 2))
+        c_and_y = Variable(maybe_cuda(torch.cat((c.data, batch_y_values), 2)) )
 
         lengths = [c_and_y.data.size(1) for i in range(c_and_y.data.size(0))]
         packed_c_and_y = pack_padded_sequence(c_and_y,lengths,batch_first=True)
@@ -103,7 +103,7 @@ class EncoderDecoder(nn.Module):
         last_y_values = torch.FloatTensor(last_y_values)
 
         x = torch.cat((output.data, last_y_values), 1)
-        predicted_value = self.fc(Variable(x))
+        predicted_value = self.fc(Variable(maybe_cuda(x) ))
         return predicted_value
 
 
