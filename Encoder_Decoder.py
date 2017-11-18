@@ -34,7 +34,7 @@ class Encoder(nn.Module):
         ## TODO: can I get part of the packed_seq without unpaked it first ?
         unPacked_output = pad_packed_sequence(packed_output,batch_first=True) #batchSize x seqLength x FeatureSize
         # TODO: check that -1 is indeed the kast timestamp (and not 0)
-        output = Variable(unPacked_output[0].data[:,-1,:]) # batchSize * inputSize*2
+        output = Variable(maybe_cuda(unPacked_output[0].data[:,-1,:]) ) # batchSize * inputSize*2
         #lengths = [output.size(1) for i in range(output.size(0))]
         #packed_output = pack_padded_sequence(output,lengths,batch_first=True)
         return output
