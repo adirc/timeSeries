@@ -42,7 +42,7 @@ def main(args):
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
     # Reduce LR by 0.1 every 3 epochs
-    ##torch.optim.lr_scheduler.StepLR(optimizer, step_size=len(train_dl) * 3, gamma=0.1, last_epoch=-1)
+    torch.optim.lr_scheduler.StepLR(optimizer, step_size=len(train_dl) * 3, gamma=0.1, last_epoch=-1)
 
     for j in range(num_epochs):
         total_loss = float(0)
