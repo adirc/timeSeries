@@ -27,7 +27,7 @@ def main(args):
     path = '../data/nasdaq100/small/nasdaq100_padding.csv'
 
 
-    nasdaq_dataset = NasdaqDataset(path,history,normalization=True,normalize_ys=True,scalingNorm=args.scaling)
+    nasdaq_dataset = NasdaqDataset(path,history,normalization=args.normalize,normalize_ys=args.normalize_ys,scalingNorm=args.scaling)
     train_dl = DataLoader(nasdaq_dataset,batch_size=batch_size ,collate_fn = collate_fn)
     rmse_calc = rmse()
     #model = BasicRnn.create()
@@ -75,10 +75,7 @@ def main(args):
 
         total_loss = total_loss / len(train_dl)
         print ('')
-        print('RMSE is ', str(rmse_calc.get_rmse()))
-        print('MAE is ', str(rmse_calc.get_mae()))
-        print ('total_loss = ',str(total_loss))
-        print('')
+        print ('RMSE: {:.4}, MAE: {:.4}, totalLoss: {:.4} . '.format(rmse_calc.get_rmse(), rmse_calc.get_mae(), total_loss))
 
         rmse_calc.reset()
     if (args.saveModel):
@@ -99,6 +96,10 @@ if __name__ == '__main__':
 
 
     parser.add_argument('--scaling', help='scaling or normalization?', action='store_true')
+    parser.add_argument('--normalize_ys', help='normalization of labels?', action='store_true')
+    parser.add_argument('--normalize', help='use normalization?', action='store_true')
+
+
 
 
 
