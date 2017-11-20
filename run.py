@@ -27,7 +27,7 @@ def main(args):
     path = '../data/nasdaq100/small/nasdaq100_padding.csv'
 
 
-    nasdaq_dataset = NasdaqDataset(path,history,normalization=True,normalize_ys=True,scalingNorm=False)
+    nasdaq_dataset = NasdaqDataset(path,history,normalization=True,normalize_ys=True,scalingNorm=args.scaling)
     train_dl = DataLoader(nasdaq_dataset,batch_size=batch_size ,collate_fn = collate_fn)
     rmse_calc = rmse()
     #model = BasicRnn.create()
@@ -96,6 +96,14 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', help='num of epochs', type=int, default=10)
     parser.add_argument('--schedulerSteps', help='lr scheduler steps', type=int, default=3)
     parser.add_argument('--bs', help='Batch size', type=int, default=16)
+
+
+    parser.add_argument('--scaling', help='scaling or normalization?', action='store_true')
+
+
+
+
+
 
 
 
