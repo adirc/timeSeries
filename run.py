@@ -8,7 +8,7 @@ from tqdm import tqdm
 from calc_statistics import rmse
 import numpy as np
 import os
-from utils import maybe_cuda
+from utils import maybe_cuda, grad_norm
 
 
 
@@ -39,13 +39,9 @@ def main(args):
         model = Encoder_Decoder.create(isCuda)
     model.train()
     model = maybe_cuda(model,args.cuda)
-    print (1e-3)
-    print(1e-2)
-    print (0.01)
-    print (args.lr)
     optimizer = torch.optim.Adam(model.parameters(), lr=float(args.lr))
 
-    # Reduce LR by 0.1 every 3 epochs
+    # Reduce LR by 0.1 every schedulerSteps epochs
     torch.optim.lr_scheduler.StepLR(optimizer, step_size=len(train_dl) * args.schedulerSteps, gamma=0.1, last_epoch=-1)
 
     for j in range(num_epochs):
