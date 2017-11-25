@@ -64,14 +64,19 @@ class Decoder(nn.Module):
         return Variable(maybe_cuda(unPacked_output[0].data[:,-1,:],self.isCuda) )
 
 class EncoderDecoder(nn.Module):
-    def __init__(self,is_cuda):
+    def __init__(self,is_cuda,binaryLabel = False):
         super(EncoderDecoder,self).__init__()
         self.isCuda = is_cuda
         self.encoder = Encoder(self.isCuda )
         # *2 for bidirectional. +1 for previous ys
         self.decoder = Decoder(self.isCuda ,self.encoder.hidden* 2 + 1)
-        self.fc = nn.Linear(self.decoder.hidden * 2 + 1,1)
-        self.criterion = nn.MSELoss()
+
+        if binaryLabel:
+            self.criterion = nn.CrossEntropyLoss()
+            self.fc = nn.Linear(self.decoder.hidden * 2 + 1, 2)
+        else:
+            self.fc = nn.Linear(self.decoder.hidden * 2 + 1, 1)
+            self.criterion = nn.MSELoss()
 
     def forward(self,batch):
 
@@ -107,5 +112,5 @@ class EncoderDecoder(nn.Module):
         return predicted_value
 
 
-def create(isCuda):
-    return EncoderDecoder(isCuda)
+def create(isCuda,binaryLabel):
+    return EncoderDecoder(isCuda,binaryLabel)

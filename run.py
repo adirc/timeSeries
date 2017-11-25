@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from NasdaqLoader import NasdaqDataset,collate_fn
+from NasdaqLoader import NasdaqDataset
 from torch.utils.data import DataLoader
 import BasicRnn
 import Encoder_Decoder
@@ -8,7 +8,7 @@ from tqdm import tqdm
 from calc_statistics import rmse
 import numpy as np
 import os
-from utils import maybe_cuda, grad_norm
+from utils import maybe_cuda, grad_norm, softmax, predictions_analysis
 
 
 
@@ -27,8 +27,8 @@ def main(args):
     path = '../data/nasdaq100/small/nasdaq100_padding.csv'
 
 
-    nasdaq_dataset = NasdaqDataset(path,history,normalization=args.normalize,normalize_ys=args.normalize_ys,scalingNorm=args.scaling)
-    train_dl = DataLoader(nasdaq_dataset,batch_size=batch_size ,collate_fn = collate_fn)
+    nasdaq_dataset = NasdaqDataset(path,history,normalization=args.normalize,normalize_ys=args.normalize_ys,scalingNorm=args.scaling,binaryLabel=args.binary)
+    train_dl = DataLoader(nasdaq_dataset,batch_size=batch_size ,collate_fn = nasdaq_dataset.collate_fn)
     rmse_calc = rmse()
     #model = BasicRnn.create()
     if (args.loadModel):
@@ -36,10 +36,12 @@ def main(args):
             print ('loaded model ' + os.path.abspath(f.name) )
             model = torch.load(f)
     else:
-        model = Encoder_Decoder.create(isCuda)
+        model = Encoder_Decoder.create(isCuda,args.binary)
     model.train()
     model = maybe_cuda(model,args.cuda)
     optimizer = torch.optim.Adam(model.parameters(), lr=float(args.lr))
+    preds_stats = predictions_analysis()
+
 
     # Reduce LR by 0.1 every schedulerSteps epochs
     torch.optim.lr_scheduler.StepLR(optimizer, step_size=len(train_dl) * args.schedulerSteps, gamma=0.1, last_epoch=-1)
@@ -60,12 +62,22 @@ def main(args):
                 torch.nn.utils.clip_grad_norm(model.parameters(),max_norm = args.maxNorm)
                 #grad_norm(model.parameters())
 
+
                 optimizer.step()
                 total_loss += loss.data[0]
                 pbar.set_description('Training, #epoch={:} loss={:.4}'.format(j+1,np.true_divide(total_loss,i + 1) ))
-                unNormOutput = NasdaqDataset.unNormalizedYs(nasdaq_dataset, output.data)
-                unNormTarget = NasdaqDataset.unNormalizedYs(nasdaq_dataset, target.data)
-                rmse_calc.add(unNormOutput.cpu()  - unNormTarget.cpu()  )
+
+
+                if (args.binary):
+                    output_prob = softmax(output.data.cpu().numpy())
+                    output_preds = output_prob[:, 1] > 0.3
+                    target_preds = target.data.cpu().numpy()
+                    preds_stats.add(output_preds ,target_preds )
+                else:
+                    unNormOutput = NasdaqDataset.unNormalizedYs(nasdaq_dataset, output.data)
+                    unNormTarget = NasdaqDataset.unNormalizedYs(nasdaq_dataset, target.data)
+                    rmse_calc.add(unNormOutput.cpu()  - unNormTarget.cpu()  )
+
 
         #print a prediction
         #print (unNormOutput[0])
@@ -74,10 +86,16 @@ def main(args):
 
 
         total_loss = total_loss / len(train_dl)
-        print ('')
-        print ('RMSE: {:.4}, MAE: {:.4}, totalLoss: {:.4} . '.format(rmse_calc.get_rmse(), rmse_calc.get_mae(), total_loss))
 
-        rmse_calc.reset()
+        if (args.binary):
+            print (preds_stats.get_accuracy())
+        else:
+            print ('')
+            print ('RMSE: {:.4}, MAE: {:.4}, totalLoss: {:.4} . '.format(rmse_calc.get_rmse(), rmse_calc.get_mae(), total_loss))
+            print('')
+            rmse_calc.reset()
+
+
     if (args.saveModel):
         torch.save(model,str('/home/adir/Projects/timeSeriesPrediction/models/model.t7' ))
 
@@ -87,12 +105,14 @@ if __name__ == '__main__':
 
     parser.add_argument('--loadModel', help='load model?', action='store_true')
     parser.add_argument('--saveModel', help='save model?', action='store_true')
+    parser.add_argument('--binary', help='use binary labels?', action='store_true')
+
     parser.add_argument('--cuda', help='cuda?', action='store_true')
     parser.add_argument('--maxNorm', help='max norm of gradient', default=1)
     parser.add_argument('--lr', help='initial lr', default=1e-3)
     parser.add_argument('--epochs', help='num of epochs', type=int, default=10)
     parser.add_argument('--schedulerSteps', help='lr scheduler steps', type=int, default=3)
-    parser.add_argument('--bs', help='Batch size', type=int, default=16)
+    parser.add_argument('--bs', help='Batch size', type=int, default=128)
 
 
     parser.add_argument('--scaling', help='scaling or normalization?', action='store_true')

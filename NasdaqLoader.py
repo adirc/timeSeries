@@ -19,12 +19,21 @@ def read_nasdaq_csv_file(path):
 
 
 
-def collate_fn(batch):
 
-    return [b[0] for b  in batch],Variable(torch.FloatTensor([b[1] for b in batch]), requires_grad=False)
+
 
 ### data is list of list. each list is a row in nasdaq csv data
 class NasdaqDataset(Dataset):
+
+    def collate_fn(self,batch):
+
+        if (self.binaryLabel):
+            return [b[0] for b in batch], Variable(torch.LongTensor(np.array([b[1] for b in batch], dtype=np.long)), requires_grad=False)
+        else:
+            return [b[0] for b in batch], Variable(torch.FloatTensor([b[1] for b in batch]), requires_grad=False)
+
+
+
 
     def normalize_data(self,mat):
 
@@ -55,13 +64,14 @@ class NasdaqDataset(Dataset):
         else:
             return (x*self.stds[-1]) + self.means[-1]
 
-    def __init__(self, root,history,normalization = False,normalize_ys = False,scalingNorm = True):
+    def __init__(self, root,history,normalization = False,normalize_ys = False,scalingNorm = True,binaryLabel=False):
         self.root = root
         self.data,self.y_s = read_nasdaq_csv_file(root)
         self.history = history
         self.normalization = normalization
         self.normalize_ys = normalize_ys
         self.scalingNorm = scalingNorm
+        self.binaryLabel = binaryLabel
 
         if (normalization):
             self.data = self.normalize_data(self.data)
@@ -71,6 +81,10 @@ class NasdaqDataset(Dataset):
             self.y_s = self.data[:,-1]
 
         self.data = np.c_[self.data, self.y_s]
+
+        if binaryLabel:
+            self.y_s = (self.y_s[1:] - self.y_s[:-1]  > 0).astype(int)
+            self.data = self.data[:-1,:] # match data and labels sizes
 
 
 
