@@ -47,7 +47,8 @@ def main(args):
 
 
     # Reduce LR by 0.1 every schedulerSteps epochs
-    torch.optim.lr_scheduler.StepLR(optimizer, step_size=len(train_dl) * args.schedulerSteps, gamma=0.1, last_epoch=-1)
+    # uncomment to enable LR scheduler
+    #torch.optim.lr_scheduler.StepLR(optimizer, step_size=len(train_dl) * args.schedulerSteps, gamma=0.1, last_epoch=-1)
 
     for j in range(num_epochs):
         total_loss = float(0)
@@ -62,7 +63,8 @@ def main(args):
                 loss.backward()
 
                 #grad_norm(model.parameters())
-                torch.nn.utils.clip_grad_norm(model.parameters(),max_norm = args.maxNorm)
+                #uncomment to enable max norm
+                # torch.nn.utils.clip_grad_norm(model.parameters(),max_norm = args.maxNorm)
                 #grad_norm(model.parameters())
 
 
