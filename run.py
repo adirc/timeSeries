@@ -22,7 +22,7 @@ def main(args):
 
     num_epochs = args.epochs
     batch_size = args.bs
-    history = 10
+    history = 1
     useLabelAsFeatures= True
 
 
@@ -77,11 +77,14 @@ def main(args):
                     #uncomment for using threshold 0.3 and not argmax
                     #output_prob = softmax(output.data.cpu().numpy())
                     #output_preds = output_prob[:, 1] > 0.3
-                    print (output)
-                    output_preds = output.data.cpu().numpy().argmax(axis=1)
+
+                    output_prob = softmax(output.data.cpu().numpy())
+                    #print(output_prob)
+                    output_preds = output_prob.argmax(axis=1)
                     target_preds = target.data.cpu().numpy()
                     preds_stats.add(output_preds ,target_preds )
                     # print (sample[0].data.shape)
+                    # print(sample[0])
                     # print ('')
                     # print(target_preds)
                     # print(output_preds)
