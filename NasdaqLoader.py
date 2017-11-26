@@ -20,8 +20,6 @@ def read_nasdaq_csv_file(path):
 
 
 
-
-
 ### data is list of list. each list is a row in nasdaq csv data
 class NasdaqDataset(Dataset):
 
@@ -36,44 +34,45 @@ class NasdaqDataset(Dataset):
 
 
     def normalize_data(self,mat):
-        #
-        # if (self.scalingNorm):
-        #     # axis=0 - over coloumns
-        #     maxes = np.max(mat, axis=0)
-        #     mins = np.min(mat, axis=0)
-        #     tmp = (mat - mins) / (maxes - mins)
-        #     return tmp,maxes,mins
 
-        # axis=0 - over coloumns
-        means = np.mean(mat, axis=0)
-        stds = np.std(mat, axis=0)
-        tmp = (mat - means) / (stds)
-        return tmp,means,stds
+        if (self.scaling):
+            # axis=0 - over coloumns
+            maxes = np.max(mat, axis=0)
+            mins = np.min(mat, axis=0)
+            tmp = (mat - mins) / (maxes - mins)
+            return tmp,maxes,mins
+        else:
+            # axis=0 - over coloumns
+            means = np.mean(mat, axis=0)
+            stds = np.std(mat, axis=0)
+            tmp = (mat - means) / (stds)
+            return tmp,means,stds
 
 
     def getNormalizeFactors(self):
-        # if (self.scalingNorm):
-        #     return self.maxes,self.mins
-        # else:
-        return self.means,self.stds
+        if (self.scaling):
+            return self.maxes,self.mins
+        else:
+            return self.means,self.stds
 
     def unNormalizedYs(self, x):
         if (not self.normalize_ys):
             return x
 
-        # if (self.scalingNorm):
-        #     # first var is maxes. second var is mins
-        #     return x*(self.firstVar - self.secondVar)  + self.secondVar
-        # else:
-        return (x*self.y_std) + self.y_mean
+        if (self.scaling):
+            # first var is maxes. second var is mins
+            return x*(self.y_max - self.y_min)  + self.y_min
+        else:
+            return (x*self.y_std) + self.y_mean
 
 
-    def __init__(self, root, history, useLabelAsFeatures,normalization = False, normalize_ys = False, convertToBinaryLabel=False):
+    def __init__(self, root, history, useLabelAsFeatures,normalization = False, normalize_ys = False, convertToBinaryLabel=False,scaling = False):
         self.root = root
         self.data,self.y_s = read_nasdaq_csv_file(root)
         self.history = history
         self.normalization = normalization
         self.normalize_ys = normalize_ys
+        self.scaling = scaling
 
         self.binaryLabel = convertToBinaryLabel
 
@@ -81,12 +80,16 @@ class NasdaqDataset(Dataset):
             self.data = np.c_[self.data, self.y_s]
 
         if (normalization):
-            self.data, self.means,self.stds = self.normalize_data(self.data)
+            if (scaling):
+                self.data, self.maxes, self.mins = self.normalize_data(self.data)
+            else:
+                self.data, self.means,self.stds = self.normalize_data(self.data)
 
         if (normalize_ys):
-            #take previous ys from normalized data
-            #self.y_s = self.data[:,-1]
-            self.y_s, self.y_mean, self.y_std = self.normalize_data(self.y_s)
+            if (scaling):
+                self.y_s, self.y_max, self.y_min = self.normalize_data(self.y_s)
+            else:
+                self.y_s, self.y_mean, self.y_std = self.normalize_data(self.y_s)
 
         if convertToBinaryLabel:
             self.y_s = (self.y_s[1:] - self.y_s[:-1]  > 0).astype(int)

@@ -15,23 +15,15 @@ from utils import maybe_cuda, grad_norm, softmax, predictions_analysis
 
 def main(args):
 
-    if (args.cuda):
-        isCuda = True
-    else:
-        isCuda = False
 
-    num_epochs = args.epochs
-    batch_size = args.bs
-    history = 1
+
     useLabelAsFeatures= True
-
-
     path = '../data/nasdaq100/small/nasdaq100_padding.csv'
 
 
-    nasdaq_dataset = NasdaqDataset(path, history,useLabelAsFeatures, normalization=args.normalize, normalize_ys=args.normalize_ys,
+    nasdaq_dataset = NasdaqDataset(path, args.history,useLabelAsFeatures, normalization=args.normalize, normalize_ys=args.normalize_ys,
                                    convertToBinaryLabel=args.binary)
-    train_dl = DataLoader(nasdaq_dataset,batch_size=batch_size ,collate_fn = nasdaq_dataset.collate_fn)
+    train_dl = DataLoader(nasdaq_dataset,batch_size=args.bs ,collate_fn = nasdaq_dataset.collate_fn)
     rmse_calc = rmse()
     #model = BasicRnn.create()
     if (args.loadModel):
@@ -39,7 +31,7 @@ def main(args):
             print ('loaded model ' + os.path.abspath(f.name) )
             model = torch.load(f)
     else:
-        model = Encoder_Decoder.create(isCuda,args.binary,encoderInputSize=nasdaq_dataset.get_num_of_features())
+        model = Encoder_Decoder.create(args.cuda,args.binary,encoderInputSize=nasdaq_dataset.get_num_of_features())
     model.train()
     model = maybe_cuda(model,args.cuda)
     optimizer = torch.optim.Adam(model.parameters(), lr=float(args.lr))
@@ -50,7 +42,7 @@ def main(args):
     # uncomment to enable LR scheduler
     #torch.optim.lr_scheduler.StepLR(optimizer, step_size=len(train_dl) * args.schedulerSteps, gamma=0.1, last_epoch=-1)
 
-    for j in range(num_epochs):
+    for j in range(args.epochs):
         total_loss = float(0)
         with tqdm(desc='Training', total=len(train_dl)) as pbar:
 
@@ -127,9 +119,10 @@ if __name__ == '__main__':
     parser.add_argument('--maxNorm', help='max norm of gradient', default=1)
     parser.add_argument('--lr', help='initial lr', default=1e-3)
     parser.add_argument('--epochs', help='num of epochs', type=int, default=10)
+    parser.add_argument('--history', help='num of epochs', type=int, default=5)
     parser.add_argument('--schedulerSteps', help='lr scheduler steps', type=int, default=3)
     parser.add_argument('--bs', help='Batch size', type=int, default=16)
-    #parser.add_argument('--scaling', help='scaling or normalization?', action='store_true')
+    parser.add_argument('--scaling', help='scaling or normalization?', action='store_true')
     parser.add_argument('--normalize_ys', help='normalization of labels?', action='store_true')
     parser.add_argument('--normalize', help='use normalization?', action='store_true')
 
