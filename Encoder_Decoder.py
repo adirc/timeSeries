@@ -11,7 +11,7 @@ def zero_state(module, batch_size):
 
 class Encoder(nn.Module):
 
-    def __init__(self,is_cuda, input_size=82, hidden=128, num_layers=2):
+    def __init__(self,is_cuda, input_size, hidden=128, num_layers=2):
         super(Encoder, self).__init__()
         self.isCuda = is_cuda
         self.num_layers = num_layers
@@ -64,10 +64,10 @@ class Decoder(nn.Module):
         return Variable(maybe_cuda(unPacked_output[0].data[:,-1,:],self.isCuda) )
 
 class EncoderDecoder(nn.Module):
-    def __init__(self,is_cuda,binaryLabel = False):
+    def __init__(self,is_cuda,encoderInputSize,binaryLabel = False):
         super(EncoderDecoder,self).__init__()
         self.isCuda = is_cuda
-        self.encoder = Encoder(self.isCuda )
+        self.encoder = Encoder(self.isCuda, input_size= encoderInputSize )
         # *2 for bidirectional. +1 for previous ys
         self.decoder = Decoder(self.isCuda ,self.encoder.hidden* 2 + 1)
 
@@ -83,8 +83,9 @@ class EncoderDecoder(nn.Module):
         batchSize = len(batch)
         historySize = batch[0].shape[0]
 
-        # remove last column - the previous y_s
-        batch_to_encoder = [b[:,:-1] for b in batch]
+        # uncomennt for: remove last column - the previous y_s
+        #batch_to_encoder = [b[:,:-1] for b in batch]
+        batch_to_encoder = [b[:,:] for b in batch]
         big_tensor = Variable(maybe_cuda(torch.FloatTensor(batch_to_encoder),self.isCuda) )
         lengths = [big_tensor.size(1) for i in range(0, big_tensor.size(0))]
         packed_batch_to_encoder = pack_padded_sequence(big_tensor, lengths  , batch_first=True)
@@ -112,5 +113,5 @@ class EncoderDecoder(nn.Module):
         return predicted_value
 
 
-def create(isCuda,binaryLabel):
-    return EncoderDecoder(isCuda,binaryLabel)
+def create(isCuda,binaryLabel,encoderInputSize):
+    return EncoderDecoder(isCuda,encoderInputSize,binaryLabel)
