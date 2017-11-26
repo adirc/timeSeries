@@ -77,7 +77,7 @@ def main(args):
                     #uncomment for using threshold 0.3 and not argmax
                     #output_prob = softmax(output.data.cpu().numpy())
                     #output_preds = output_prob[:, 1] > 0.3
-
+                    print (output)
                     output_preds = output.data.cpu().numpy().argmax(axis=1)
                     target_preds = target.data.cpu().numpy()
                     preds_stats.add(output_preds ,target_preds )
