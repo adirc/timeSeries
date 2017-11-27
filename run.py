@@ -49,10 +49,14 @@ def main(args):
             for i, (sample, target) in enumerate(train_dl):
                 pbar.update()
 
+                # print(sample[0])
+                # print(target[0])
+
                 model.zero_grad()
                 output = model(sample)
                 loss = model.criterion(output,maybe_cuda(target,args.cuda))
                 loss.backward()
+
 
                 #grad_norm(model.parameters())
                 #uncomment to enable max norm
@@ -76,7 +80,7 @@ def main(args):
                     target_preds = target.data.cpu().numpy()
                     preds_stats.add(output_preds ,target_preds )
                     # print (sample[0].data.shape)
-                    # print(sample[0])
+
                     # print ('')
                     # print(target_preds)
                     # print(output_preds)
@@ -119,20 +123,12 @@ if __name__ == '__main__':
     parser.add_argument('--maxNorm', help='max norm of gradient', default=1)
     parser.add_argument('--lr', help='initial lr', default=1e-3)
     parser.add_argument('--epochs', help='num of epochs', type=int, default=10)
-    parser.add_argument('--history', help='num of epochs', type=int, default=5)
+    parser.add_argument('--history', help='num of epochs', type=int, default=1)
     parser.add_argument('--schedulerSteps', help='lr scheduler steps', type=int, default=3)
     parser.add_argument('--bs', help='Batch size', type=int, default=16)
     parser.add_argument('--scaling', help='scaling or normalization?', action='store_true')
     parser.add_argument('--normalize_ys', help='normalization of labels?', action='store_true')
     parser.add_argument('--normalize', help='use normalization?', action='store_true')
-
-
-
-
-
-
-
-
 
 
     main(parser.parse_args())

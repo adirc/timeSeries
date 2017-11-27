@@ -4,6 +4,8 @@ from torch.autograd import Variable
 from torch.nn.utils.rnn import pad_packed_sequence,pack_padded_sequence
 from utils import maybe_cuda
 
+#TODO: change *2 - bidrectional.
+
 def zero_state(module, batch_size):
     # * 2 is for the two directions
     return Variable( maybe_cuda(torch.zeros(module.num_layers * 2, batch_size, module.hidden),module.isCuda) ), \
@@ -28,15 +30,8 @@ class Encoder(nn.Module):
 
         init_s = zero_state(self,batch_size=batch.batch_sizes[0])
         packed_output,(h_0,c_0) = self.lstm(batch,init_s)
-
-        ##TODO: variable initialize - to calc grad or not
-
-        ## TODO: can I get part of the packed_seq without unpaked it first ?
         unPacked_output = pad_packed_sequence(packed_output,batch_first=True) #batchSize x seqLength x FeatureSize
-        # TODO: check that -1 is indeed the kast timestamp (and not 0)
         output = Variable(maybe_cuda(unPacked_output[0].data[:,-1,:],self.isCuda) ) # batchSize * inputSize*2
-        #lengths = [output.size(1) for i in range(output.size(0))]
-        #packed_output = pack_padded_sequence(output,lengths,batch_first=True)
         return output
 
 
@@ -60,7 +55,6 @@ class Decoder(nn.Module):
         init_s = zero_state(self,batch_size=batch.batch_sizes[0])
         packed_output,(h_0,c_0) = self.lstm(batch,init_s)
         unPacked_output = pad_packed_sequence(packed_output,batch_first=True) #batchSize x seqLength x FeatureSize
-        # TODO: check that -1 is indeed the last timestamp (and not 0)
         return Variable(maybe_cuda(unPacked_output[0].data[:,-1,:],self.isCuda) )
 
 class EncoderDecoder(nn.Module):
