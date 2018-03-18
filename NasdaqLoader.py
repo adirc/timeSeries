@@ -92,8 +92,8 @@ class NasdaqDataset(Dataset):
                 self.y_s, self.y_mean, self.y_std = self.normalize_data(self.y_s)
 
         if convertToBinaryLabel:
-            self.y_s = (self.y_s[1:] - self.y_s[:-1]  > 0).astype(int)
-            self.data = self.data[:-1,:] # match data and labels sizes
+            self.y_s = ((self.y_s[1:] - self.y_s[:-1])  > 0).astype(int)
+            self.data = self.data[1:,:] # match data and labels sizes
 
     def __getitem__(self, index):
 
