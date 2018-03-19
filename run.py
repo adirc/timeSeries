@@ -60,7 +60,7 @@ def main(args):
 
                 #grad_norm(model.parameters())
                 #uncomment to enable max norm
-                # torch.nn.utils.clip_grad_norm(model.parameters(),max_norm = args.maxNorm)
+                torch.nn.utils.clip_grad_norm(model.parameters(),max_norm = args.maxNorm)
                 #grad_norm(model.parameters())
 
 
