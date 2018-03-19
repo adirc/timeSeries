@@ -54,7 +54,7 @@ def main(args):
 
                 model.zero_grad()
                 output = model(sample)
-                print(output)
+                #print(output)
                 loss = model.criterion(output,maybe_cuda(target,args.cuda))
                 loss.backward()
 
