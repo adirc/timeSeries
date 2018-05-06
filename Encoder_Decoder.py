@@ -2,14 +2,11 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 from torch.nn.utils.rnn import pad_packed_sequence,pack_padded_sequence
-from utils import maybe_cuda
+from utils import maybe_cuda,zero_state
 
 #TODO: change *2 - bidrectional.
 
-def zero_state(module, batch_size):
-    # * 2 is for the two directions
-    return Variable( maybe_cuda(torch.zeros(module.num_layers * 2, batch_size, module.hidden),module.isCuda) ), \
-           Variable(maybe_cuda(torch.zeros(module.num_layers * 2, batch_size, module.hidden),module.isCuda) )
+
 
 class Encoder(nn.Module):
 
