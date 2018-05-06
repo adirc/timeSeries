@@ -49,7 +49,7 @@ class BasicRnn(nn.Module):
         # TODO: check that -1 is indeed the last timestamp (and not 0)
         # last_y_values = unpack_batch[0][:, -1, -1].data.contiguous().view(batch.batch_sizes[0], 1)
         #x = self.fc( Variable( torch.cat( (unPacked_output[0].data[:,-1,:],last_y_values),1)  ))
-        x = self.fc(Variable(unPacked_output[0].data[:, -1, :]))
+        x = self.fc(Variable(maybe_cuda(unPacked_output[0].data[:, -1, :]) ))
 
         return x
 
