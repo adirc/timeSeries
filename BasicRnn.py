@@ -49,5 +49,5 @@ class BasicRnn(nn.Module):
         return x
 
 
-def create():
-    return BasicRnn(biderctional = False)
+def create(isCuda):
+    return BasicRnn(biderctional = False,isCuda = isCuda)
