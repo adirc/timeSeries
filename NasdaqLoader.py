@@ -66,7 +66,7 @@ class NasdaqDataset(Dataset):
             return (x*self.y_std) + self.y_mean
 
 
-    def __init__(self, root, history, useLabelAsFeatures,normalization = False, normalize_ys = False, convertToBinaryLabel=False,scaling = False):
+    def __init__(self, root, history, useLabelAsFeatures = True,normalization = False, normalize_ys = False, convertToBinaryLabel=False,scaling = False):
         self.root = root
         self.data,self.y_s = read_nasdaq_csv_file(root)
         self.history = history
@@ -102,7 +102,7 @@ class NasdaqDataset(Dataset):
         #return [self.data[i][:-1] for i in range(index,index + self.history)] , self.data[index + self.history][-1]
         #return [self.data[i,:] for i in range(index,index + self.history)] , self.data[index + self.history,:][-1]
 
-        X = self.data[index:(index + self.history), :]
+        X = self.data[index:(index + 1 + self.history), :]
         return  X  , self.y_s[index + self.history]
 
     def __len__(self):

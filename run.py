@@ -20,7 +20,7 @@ def main(args):
     path = '../data/nasdaq100/small/nasdaq100_padding.csv'
     preds_stats = predictions_analysis()
     rmse_calc = rmse()
-    nasdaq_dataset = NasdaqDataset(path, args.history,useLabelAsFeatures, normalization=args.normalize, normalize_ys=args.normalize_ys,
+    nasdaq_dataset = NasdaqDataset(path, args.history,useLabelAsFeatures = True, normalization=args.normalize, normalize_ys=args.normalize_ys,
                                    convertToBinaryLabel=args.binary)
     train_dl = DataLoader(nasdaq_dataset,batch_size=args.bs ,collate_fn = nasdaq_dataset.collate_fn)
 
@@ -30,8 +30,8 @@ def main(args):
             print ('loaded model ' + os.path.abspath(f.name) )
             model = torch.load(f)
     else:
-        model = Encoder_Decoder.create(args.cuda,args.binary,encoderInputSize=nasdaq_dataset.get_num_of_features())
-        #model = BasicRnn.create()
+        #model = Encoder_Decoder.create(args.cuda,args.binary,encoderInputSize=nasdaq_dataset.get_num_of_features())
+        model = BasicRnn.create()
 
 
     model.train()
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     parser.add_argument('--maxNorm', help='max norm of gradient', default=1)
     parser.add_argument('--lr', help='initial lr', default=1e-3)
     parser.add_argument('--epochs', help='num of epochs', type=int, default=10)
-    parser.add_argument('--history', help='num of epochs', type=int, default=1)
+    parser.add_argument('--history', help='num of epochs', type=int, default=0)
     parser.add_argument('--schedulerSteps', help='lr scheduler steps', type=int, default=3)
     parser.add_argument('--bs', help='Batch size', type=int, default=16)
     parser.add_argument('--scaling', help='scaling or normalization?', action='store_true')
