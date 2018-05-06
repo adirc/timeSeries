@@ -31,7 +31,7 @@ def main(args):
             model = torch.load(f)
     else:
         #model = Encoder_Decoder.create(args.cuda,args.binary,encoderInputSize=nasdaq_dataset.get_num_of_features())
-        model = BasicRnn.create(isCuda = False)
+        model = BasicRnn.create(isCuda = args.cuda)
 
 
     model.train()
