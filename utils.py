@@ -3,10 +3,11 @@ from torch.autograd import Variable
 import torch
 
 
-def zero_state(module, batch_size):
+def zero_state(module, batch_size,bidrectional=True):
     # * 2 is for the two directions
-    return Variable( maybe_cuda(torch.zeros(module.num_layers * 2, batch_size, module.hidden),module.isCuda) ), \
-           Variable(maybe_cuda(torch.zeros(module.num_layers * 2, batch_size, module.hidden),module.isCuda) )
+    bidrectionalMult = 2 if bidrectional else 1
+    return Variable( maybe_cuda(torch.zeros(module.num_layers * bidrectionalMult , batch_size, module.hidden),module.isCuda) ), \
+           Variable(maybe_cuda(torch.zeros(module.num_layers * bidrectionalMult , batch_size, module.hidden),module.isCuda) )
 
 def grad_norm(parameters,norm_type = 2):
     total_norm = 0

@@ -10,6 +10,7 @@ class BasicRnn(nn.Module):
     def __init__(self, input_size=82, hidden=128, num_layers=2,biderctional = True,isCuda=False):
         super(BasicRnn, self).__init__()
         self.isCuda = isCuda
+        self.bidrectional = biderctional
         self.num_layers = num_layers
         self.hidden = hidden
         self.input_size = input_size
@@ -34,7 +35,7 @@ class BasicRnn(nn.Module):
         big_tensor = Variable(maybe_cuda(torch.FloatTensor(batch_to_rnn), self.isCuda))
         lengths = [big_tensor.size(1) for i in range(0, big_tensor.size(0))]
         packed_batch = pack_padded_sequence(big_tensor, lengths, batch_first=True)
-        init_s = zero_state(self,batch_size=len((batch)))
+        init_s = zero_state(self,batch_size=len((batch)),bidrectional= self.bidrectional)
 
         packed_output,(h_0,c_0) = self.lstm(packed_batch,init_s)
 
