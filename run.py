@@ -15,7 +15,7 @@ from utils import maybe_cuda, grad_norm, softmax, predictions_analysis
 def main(args):
 
     useLabelAsFeatures= False
-    useStepLR = False
+    useStepLR = args.useStepLR
     useGradClipping = False
     path = '../data/nasdaq100/small/nasdaq100_padding.csv'
     preds_stats = predictions_analysis()
@@ -107,6 +107,8 @@ if __name__ == '__main__':
     parser.add_argument('--scaling', help='scaling or normalization?', action='store_true')
     parser.add_argument('--normalize_ys', help='normalization of labels?', action='store_true')
     parser.add_argument('--normalize', help='use normalization?', action='store_true')
+    parser.add_argument('--useStepLR', help='use step LR?', action='store_true')
+
 
 
     main(parser.parse_args())
