@@ -16,7 +16,7 @@ def main(args):
 
     useLabelAsFeatures= False
     useStepLR = args.useStepLR
-    useGradClipping = False
+    useGradClipping = args.useGradClipping
     path = '../data/nasdaq100/small/nasdaq100_padding.csv'
     preds_stats = predictions_analysis()
     rmse_calc = rmse()
@@ -108,6 +108,8 @@ if __name__ == '__main__':
     parser.add_argument('--normalize_ys', help='normalization of labels?', action='store_true')
     parser.add_argument('--normalize', help='use normalization?', action='store_true')
     parser.add_argument('--useStepLR', help='use step LR?', action='store_true')
+    parser.add_argument('--useGradClipping', help='use grad clipping?', action='store_true')
+
 
 
 
