@@ -15,6 +15,11 @@ class rmse(object):
     def get_rmse(self):
         return np.sqrt(np.true_divide(self.sum_square_observations, self.num_observations))
 
+    def get_normalized_rmse(self):
+        unNorm_rmse = self.get_rmse()
+        to_norm_val = np.true_divide(self.sum_abs_observations, self.num_observations)
+        return np.true_divide(unNorm_rmse,to_norm_val )
+
     def get_mae(self):
         return np.true_divide(self.sum_abs_observations, self.num_observations)
 

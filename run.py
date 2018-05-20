@@ -88,7 +88,7 @@ def main(args):
             preds_stats.reset()
         else:
             print ('')
-            print ('RMSE: {:.4}, MAE: {:.4}, totalLoss: {:.4} . '.format(rmse_calc.get_rmse(), rmse_calc.get_mae(), total_loss))
+            print ('RMSE: {:.4}, Norm_RMSE: {:.4}, MAE: {:.4}, totalLoss: {:.4} . '.format(rmse_calc.get_rmse(),rmse_calc.get_normalized_rmse() ,rmse_calc.get_mae(), total_loss))
             print('')
             rmse_calc.reset()
 
