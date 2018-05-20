@@ -27,17 +27,22 @@ class BasicRnn(nn.Module):
         self.fc = nn.Linear((hidden * biderctionalMult ), 1)
 
         self.criterion = nn.MSELoss()
+        self.states = 0
 
-
-    def forward(self,batch):
+    def forward(self,batch,reset_state = True):
 
         batch_to_rnn = [b[:, :] for b in batch]
         big_tensor = Variable(maybe_cuda(torch.FloatTensor(batch_to_rnn), self.isCuda))
         lengths = [big_tensor.size(1) for i in range(0, big_tensor.size(0))]
         packed_batch = pack_padded_sequence(big_tensor, lengths, batch_first=True)
-        init_s = zero_state(self,batch_size=len((batch)),bidrectional= self.bidrectional)
 
-        packed_output,(h_0,c_0) = self.lstm(packed_batch,init_s)
+        #packed_output,(h_0,c_0) = self.lstm(packed_batch,init_s)
+        if reset_state:
+            self.states = zero_state(self,batch_size=len((batch)),bidrectional= self.bidrectional)
+
+        ###TODO: Important
+        ###TODO: how to set calc_grad as false for self.states
+        packed_output, self.last_states = self.lstm(packed_batch, self.states)
 
         ##TODO: variable initialize - to calc grad or not
 
@@ -48,6 +53,9 @@ class BasicRnn(nn.Module):
         x = self.fc(Variable(maybe_cuda(unPacked_output[0].data[:, -1, :],self.isCuda) ))
 
         return x
+
+
+
 
 
 def create(isCuda):

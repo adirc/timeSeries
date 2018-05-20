@@ -1,23 +1,25 @@
-from argparse import ArgumentParser
-from NasdaqLoader import NasdaqDataset
-from torch.utils.data import DataLoader
-import BasicRnn
-import Encoder_Decoder
-import torch
-from tqdm import tqdm
-from calc_statistics import rmse
-import numpy as np
 import os
-from utils import maybe_cuda, grad_norm, softmax, predictions_analysis
+from argparse import ArgumentParser
 
+import numpy as np
+import torch
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+
+import BasicRnn
+from calc_statistics import rmse
+from dataLoaders.NasdaqLoader import NasdaqDataset
+from utils import maybe_cuda, grad_norm, softmax, predictions_analysis
 
 
 def main(args):
 
+    reset_states_between_batches = False
     useLabelAsFeatures= False
     useStepLR = args.useStepLR
     useGradClipping = args.useGradClipping
     path = '../data/nasdaq100/small/nasdaq100_padding.csv'
+    #path = '../data/Electricity/LD2011_2014.csv'
     preds_stats = predictions_analysis()
     rmse_calc = rmse()
     nasdaq_dataset = NasdaqDataset(path, args.history,useLabelAsFeatures = True, normalization=args.normalize, normalize_ys=args.normalize_ys,
@@ -44,12 +46,13 @@ def main(args):
 
     for j in range(args.epochs):
         total_loss = float(0)
+        first_batch_in_epoch = True
         with tqdm(desc='Training', total=len(train_dl)) as pbar:
 
             for i, (sample, target) in enumerate(train_dl):
                 pbar.update()
                 model.zero_grad()
-                output = model(sample)
+                output = model(sample,(first_batch_in_epoch and not reset_states_between_batches))
                 loss = model.criterion(output,maybe_cuda(target,args.cuda))
                 loss.backward()
 
@@ -72,9 +75,12 @@ def main(args):
                     unNormOutput = NasdaqDataset.unNormalizedYs(nasdaq_dataset, output.data)
                     unNormTarget = NasdaqDataset.unNormalizedYs(nasdaq_dataset, target.data)
                     rmse_calc.add(unNormOutput.cpu()  - unNormTarget.cpu()  )
+                first_batch_in_epoch = False
+
 
 
         total_loss = total_loss / len(train_dl)
+
 
         if (args.binary):
             print ('')
@@ -85,6 +91,7 @@ def main(args):
             print ('RMSE: {:.4}, MAE: {:.4}, totalLoss: {:.4} . '.format(rmse_calc.get_rmse(), rmse_calc.get_mae(), total_loss))
             print('')
             rmse_calc.reset()
+
 
 
     if (args.saveModel):

@@ -17,9 +17,6 @@ def read_nasdaq_csv_file(path):
     return data[:,:-1], data[:,-1]
 
 
-
-
-
 ### data is list of list. each list is a row in nasdaq csv data
 class NasdaqDataset(Dataset):
 
