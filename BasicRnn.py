@@ -28,9 +28,10 @@ class BasicRnn(nn.Module):
 
         self.criterion = nn.MSELoss()
         self.states = 0
+        self.counter = 0
 
     def forward(self,batch,reset_state = True):
-
+        self.counter = self.counter  + 1
         batch_to_rnn = [b[:, :] for b in batch]
         big_tensor = Variable(maybe_cuda(torch.FloatTensor(batch_to_rnn), self.isCuda))
         lengths = [big_tensor.size(1) for i in range(0, big_tensor.size(0))]
@@ -42,7 +43,7 @@ class BasicRnn(nn.Module):
 
         ###TODO: Important
         ###TODO: how to set calc_grad as false for self.states
-        packed_output, self.last_states = self.lstm(packed_batch, self.states)
+        packed_output, self.states = self.lstm(packed_batch, self.states)
 
         ##TODO: variable initialize - to calc grad or not
 
