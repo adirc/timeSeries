@@ -14,7 +14,7 @@ from utils import maybe_cuda, grad_norm, softmax, predictions_analysis
 
 def main(args):
 
-    reset_states_between_batches = False
+    reset_states_between_batches = True
     useLabelAsFeatures= False
     useStepLR = args.useStepLR
     useGradClipping = args.useGradClipping
@@ -52,7 +52,7 @@ def main(args):
             for i, (sample, target) in enumerate(train_dl):
                 pbar.update()
                 model.zero_grad()
-                output = model(sample,(first_batch_in_epoch and not reset_states_between_batches))
+                output = model(sample,(first_batch_in_epoch or reset_states_between_batches))
                 loss = model.criterion(output,maybe_cuda(target,args.cuda))
                 loss.backward()
 
