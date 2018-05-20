@@ -14,7 +14,7 @@ from utils import maybe_cuda, grad_norm, softmax, predictions_analysis
 
 def main(args):
 
-    reset_states_between_batches = True
+    reset_states_between_batches = False if args.without_reset else True
     useLabelAsFeatures= False
     useStepLR = args.useStepLR
     useGradClipping = args.useGradClipping
@@ -116,6 +116,7 @@ if __name__ == '__main__':
     parser.add_argument('--normalize', help='use normalization?', action='store_true')
     parser.add_argument('--useStepLR', help='use step LR?', action='store_true')
     parser.add_argument('--useGradClipping', help='use grad clipping?', action='store_true')
+    parser.add_argument('--without_reset', help='not restet lstm states between batches?', action='store_true')
 
 
 
