@@ -7,7 +7,7 @@ from utils import maybe_cuda,zero_state
 
 class BasicRnn(nn.Module):
 
-    def __init__(self, input_size=82, hidden=128, num_layers=2,biderctional = True,isCuda=False):
+    def __init__(self, input_size=1, hidden=128, num_layers=2,biderctional = True,isCuda=False):
         super(BasicRnn, self).__init__()
         self.isCuda = isCuda
         self.bidrectional = biderctional
@@ -32,8 +32,11 @@ class BasicRnn(nn.Module):
 
     def forward(self,batch,reset_state = True):
         self.counter = self.counter  + 1
-        batch_to_rnn = [b[:, :] for b in batch]
-        big_tensor = Variable(maybe_cuda(torch.FloatTensor(batch_to_rnn), self.isCuda))
+
+        #TODO: changed it to supprt electricty data
+        #batch_to_rnn = [b[:, :] for b in batch]
+        big_tensor = Variable(maybe_cuda(torch.FloatTensor(batch), self.isCuda))
+        big_tensor = big_tensor.view(len(batch), big_tensor.shape[1], 1)
         lengths = [big_tensor.size(1) for i in range(0, big_tensor.size(0))]
         packed_batch = pack_padded_sequence(big_tensor, lengths, batch_first=True)
 

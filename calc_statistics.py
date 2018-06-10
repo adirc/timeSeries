@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+
 class rmse(object):
     def __init__(self):
         self.num_observations = 0
