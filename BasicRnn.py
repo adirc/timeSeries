@@ -35,9 +35,10 @@ class BasicRnn(nn.Module):
 
         #TODO: changed it to supprt electricty data
         #batch_to_rnn = [b[:, :] for b in batch]
-        big_tensor = Variable(maybe_cuda(torch.FloatTensor(batch), self.isCuda))
+        big_tensor = torch.FloatTensor(batch)
         big_tensor = big_tensor.view(len(batch), big_tensor.shape[1], 1)
         lengths = [big_tensor.size(1) for i in range(0, big_tensor.size(0))]
+        big_tensor = Variable(maybe_cuda(big_tensor, self.isCuda))
         packed_batch = pack_padded_sequence(big_tensor, lengths, batch_first=True)
 
         #packed_output,(h_0,c_0) = self.lstm(packed_batch,init_s)
