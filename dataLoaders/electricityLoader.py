@@ -49,8 +49,8 @@ class ElectricityDataset(object):
         #y_of_batch.append(self.data[(self.index + self.history),i])
         y_of_batch = torch.FloatTensor(self.data[(self.index + self.history),0:self.batch_size])
 
-        #is_last_batch = self.data.shape[0] - self.index < self.history + 1
-        is_last_batch =  self.index > 50000
+        is_last_batch = self.data.shape[0] - self.index < self.history + 1
+        #is_last_batch =  self.index > 50000
         if is_last_batch:
             self.batch_number = 0
             self.index = 0
