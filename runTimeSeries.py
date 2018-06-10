@@ -83,7 +83,7 @@ def main(args):
                     #unNormOutput = NasdaqDataset.unNormalizedYs(nasdaq_dataset, output.data)
                     #unNormTarget = NasdaqDataset.unNormalizedYs(nasdaq_dataset, target.data)
                     #rmse_calc.add(unNormOutput.cpu()  - unNormTarget.cpu()  )
-                    rmse_calc.add(output.data[:,0] - target)
+                    rmse_calc.add(output.data[:,0] - target.cpu())
 
 
                 first_batch_in_epoch = False
